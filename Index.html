@@ -4,12 +4,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#a78343">
 <title>黃金計算機</title>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -56,9 +55,7 @@ input {
     outline: none;
 }
 
-input:focus {
-    border-color: #b18b45;
-}
+input:focus { border-color: #b18b45; }
 
 .weight-row {
     display: flex;
@@ -80,10 +77,6 @@ button {
     cursor: pointer;
 }
 
-button:active {
-    opacity: 0.8;
-}
-
 .result {
     background: #faf6ed;
     padding: 17px;
@@ -101,6 +94,7 @@ button:active {
 
 .result strong {
     color: #8c682c;
+    text-align: right;
 }
 
 .total {
@@ -121,6 +115,13 @@ button:active {
     margin-top: 20px;
     background: #e8ddc8;
     color: #634d29;
+}
+
+.note {
+    font-size: 12px;
+    color: #95866e;
+    text-align: center;
+    margin-top: 15px;
 }
 </style>
 </head>
@@ -144,7 +145,7 @@ placeholder="請輸入今日金價" oninput="calculate()">
 
 <div class="weight-row">
 <input type="number" id="weight"
-placeholder="輸入重量" oninput="calculate()">
+placeholder="請輸入重量" oninput="calculate()">
 
 <button onclick="switchUnit()" id="switchBtn">
 切換為錢
@@ -154,14 +155,17 @@ placeholder="輸入重量" oninput="calculate()">
 <div class="result">
 <div>
 <span>換算克數</span>
-<strong id="grams">0 克</strong>
+<strong id="grams">— 克</strong>
 </div>
 
 <div>
 <span>換算錢數</span>
-<strong id="qian">0 錢</strong>
+<strong id="qian">— 錢</strong>
 </div>
 </div>
+
+<p class="note">換算基準：1 錢 = 3.75 克</p>
+
 
 <h3>總價與工錢</h3>
 
@@ -180,27 +184,27 @@ placeholder="請輸入錢數" oninput="calculate()">
 
 <div>
 <span>今日金價</span>
-<strong id="detailPrice">0 元／錢</strong>
+<strong id="detailPrice">— 元／錢</strong>
 </div>
 
 <div>
 <span>計算金重</span>
-<strong id="detailWeight">0 錢</strong>
+<strong id="detailWeight">— 錢</strong>
 </div>
 
 <div>
 <span>黃金本金</span>
-<strong id="principal">0 元</strong>
+<strong id="principal">— 元</strong>
 </div>
 
 <div>
 <span>黃金工錢</span>
-<strong id="labor" class="labor">0 元</strong>
+<strong id="labor" class="labor">— 元</strong>
 </div>
 
 <div class="total">
 <span>總價</span>
-<strong id="detailTotal">0 元</strong>
+<strong id="detailTotal">— 元</strong>
 </div>
 
 </div>
@@ -209,6 +213,8 @@ placeholder="請輸入錢數" oninput="calculate()">
 清空重新計算
 </button>
 
+<p class="note">黃金價格計算工具｜1 錢 = 3.75 克</p>
+
 </div>
 
 
@@ -216,22 +222,19 @@ placeholder="請輸入錢數" oninput="calculate()">
 
 let unit = "克";
 
-// 數字格式
 function format(num) {
     return Number.isFinite(num)
         ? num.toLocaleString("zh-TW", {
             maximumFractionDigits: 4
           })
-        : "0";
+        : "—";
 }
 
-// 克與錢換算
+
+// 黃金重量換算及工錢計算
 function calculate() {
 
-    const price = Number(
-        document.getElementById("goldPrice").value
-    );
-
+    const priceInput = document.getElementById("goldPrice").value;
     const weightInput = document.getElementById("weight").value;
 
     const weight = Number(weightInput);
@@ -243,48 +246,47 @@ function calculate() {
     const qian = grams / 3.75;
 
     document.getElementById("grams").innerText =
-        format(grams) + " 克";
+        weightInput === "" ? "— 克" : format(grams) + " 克";
 
     document.getElementById("qian").innerText =
-        format(qian) + " 錢";
+        weightInput === "" ? "— 錢" : format(qian) + " 錢";
 
 
-    // 工錢計算
     const totalInput = document.getElementById("total").value;
-
     const laborWeightInput =
         document.getElementById("laborWeight").value;
 
+    const price = Number(priceInput);
     const total = Number(totalInput);
     const laborWeight = Number(laborWeightInput);
 
     const principal = price * laborWeight;
-
     const labor = total - principal;
 
 
-    // 計算明細
     document.getElementById("detailPrice").innerText =
-        format(price) + " 元／錢";
+        priceInput === "" ? "— 元／錢" : format(price) + " 元／錢";
 
     document.getElementById("detailWeight").innerText =
-        format(laborWeight) + " 錢";
+        laborWeightInput === "" ? "— 錢" : format(laborWeight) + " 錢";
 
     document.getElementById("principal").innerText =
-        format(principal) + " 元";
+        priceInput === "" || laborWeightInput === ""
+        ? "— 元"
+        : format(principal) + " 元";
 
     document.getElementById("labor").innerText =
-        totalInput === "" || laborWeightInput === "" ||
-        document.getElementById("goldPrice").value === ""
-        ? "待輸入"
+        priceInput === "" || totalInput === "" ||
+        laborWeightInput === ""
+        ? "— 元"
         : format(labor) + " 元";
 
     document.getElementById("detailTotal").innerText =
-        totalInput === "" ? "待輸入" : format(total) + " 元";
+        totalInput === "" ? "— 元" : format(total) + " 元";
 }
 
 
-// 切換克與錢
+// 克與錢交換單位
 function switchUnit() {
 
     const input = document.getElementById("weight");
@@ -296,28 +298,23 @@ function switchUnit() {
         if (unit === "克") {
             input.value = value / 3.75;
             unit = "錢";
-            document.getElementById("switchBtn").innerText =
-                "切換為克";
         } else {
             input.value = value * 3.75;
             unit = "克";
-            document.getElementById("switchBtn").innerText =
-                "切換為錢";
         }
 
     } else {
-
         unit = unit === "克" ? "錢" : "克";
-
-        document.getElementById("switchBtn").innerText =
-            unit === "克" ? "切換為錢" : "切換為克";
     }
+
+    document.getElementById("switchBtn").innerText =
+        unit === "克" ? "切換為錢" : "切換為克";
 
     calculate();
 }
 
 
-// 清空
+// 清空所有欄位
 function clearAll() {
 
     document.getElementById("goldPrice").value = "";
@@ -327,8 +324,7 @@ function clearAll() {
 
     unit = "克";
 
-    document.getElementById("switchBtn").innerText =
-        "切換為錢";
+    document.getElementById("switchBtn").innerText = "切換為錢";
 
     calculate();
 }
